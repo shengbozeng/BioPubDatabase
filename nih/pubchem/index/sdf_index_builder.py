@@ -19,7 +19,7 @@ from typing import Optional, Dict, List, Union
 from rich.progress import track
 from nih.pubchem.index.record_locator import RecordLocator
 from nih.pubchem.index.sdf_index import SDFIndex
-from nih.pubchem.index.utils import (
+from nih.pubchem.index.utils_module import (
     _determine_kind,
     _is_int_ascii,
     _iter_sdf_files,

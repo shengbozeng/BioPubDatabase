@@ -18,7 +18,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Iterator, Optional, Dict, Tuple, Union
 from nih.pubchem.index.record_locator import RecordLocator
-from nih.pubchem.index.utils import _chunked
+from nih.pubchem.index.utils_module import _chunked
 
 
 @dataclass(frozen=True)

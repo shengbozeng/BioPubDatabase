@@ -16,7 +16,6 @@
                 "PYTHONPATH": "${workspaceFolder}"  // 👈 添加项目根目录到模块查找路径
             }
         },
-
         {
             "name": "SDFIndex: build (main.py + args)",
             "type": "debugpy",
@@ -29,6 +28,23 @@
             },
             "args": [
                 "build",
+                "--root", "${workspaceFolder}/nih/pubchem/index/test_index",
+                "--index", "${workspaceFolder}/nih/pubchem/index/test_index",
+                "--map-size", "1099511627776"
+            ]
+        },
+        {
+            "name": "SDFIndex: get compound (main.py + args)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/nih/pubchem/index/main.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            },
+            "args": [
+                "get-compound",
                 "--root", "${workspaceFolder}/nih/pubchem/index/test_index",
                 "--index", "${workspaceFolder}/nih/pubchem/index/test_index",
                 "--map-size", "1099511627776"
