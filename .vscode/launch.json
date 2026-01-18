@@ -28,8 +28,8 @@
             },
             "args": [
                 "build",
-                "--root", "${workspaceFolder}/nih/pubchem/index/test_index",
-                "--index", "${workspaceFolder}/nih/pubchem/index/test_index",
+                "--root", "/ai/data/pubchem_unzipped_data/conformer",
+                "--index", "/ai/data/pubchem_unzipped_data/conformer",
                 "--map-size", "1099511627776"
             ]
         },
