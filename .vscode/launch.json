@@ -10,10 +10,9 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}",   // 👈 设置当前工作目录为项目根目录
-            
+            "cwd": "${workspaceFolder}", // 👈 设置当前工作目录为项目根目录
             "env": {
-                "PYTHONPATH": "${workspaceFolder}"  // 👈 添加项目根目录到模块查找路径
+                "PYTHONPATH": "${workspaceFolder}" // 👈 添加项目根目录到模块查找路径
             }
         },
         {
@@ -28,9 +27,12 @@
             },
             "args": [
                 "build",
-                "--root", "/ai/data/pubchem_unzipped_data/conformer",
-                "--index", "/ai/data/pubchem_unzipped_data/conformer",
-                "--map-size", "1099511627776"
+                "--root",
+                "/ai/data/pubchem_unzipped_data/conformer",
+                "--index",
+                "/ai/data/pubchem_unzipped_data/conformer",
+                "--map-size",
+                "1099511627776",
             ]
         },
         {
@@ -45,9 +47,74 @@
             },
             "args": [
                 "get-compound",
-                "--root", "${workspaceFolder}/nih/pubchem/index/test_index",
-                "--index", "${workspaceFolder}/nih/pubchem/index/test_index",
-                "--map-size", "1099511627776"
+                "--root",
+                "/ai/data/pubchem_unzipped_data/compound",
+                "--index",
+                "/ai/data/pubchem_unzipped_data/compound",
+                "--cid",
+                "361276"
+            ]
+        },
+        {
+            "name": "SDFIndex: batch get compound (main.py + args)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/nih/pubchem/index/main.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            },
+            "args": [
+                "batch-get-compound",
+                "--root",
+                "/ai/data/pubchem_unzipped_data/compound",
+                "--index",
+                "/ai/data/pubchem_unzipped_data/compound",
+                "--cid_start",
+                "1",
+                "--cid_end",
+                "9999"
+            ]
+        },
+        {
+            "name": "SDFIndex: get conformer (main.py + args)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/nih/pubchem/index/main.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            },
+            "args": [
+                "get-conformer",
+                "--root",
+                "/ai/data/pubchem_unzipped_data/compound",
+                "--index",
+                "/ai/data/pubchem_unzipped_data/compound",
+                "--confid",
+                "361276"
+            ]
+        },
+        {
+            "name": "SDFIndex: list conformers (main.py + args)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/nih/pubchem/index/main.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            },
+            "args": [
+                "list-conformers",
+                "--root",
+                "/ai/data/pubchem_unzipped_data/compound",
+                "--index",
+                "/ai/data/pubchem_unzipped_data/compound",
+                "--cid",
+                "2750298"
             ]
         }
     ]

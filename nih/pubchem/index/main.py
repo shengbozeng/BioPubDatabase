@@ -30,6 +30,7 @@
 
 from __future__ import annotations
 
+from argparse import Namespace
 import json
 from pathlib import Path
 from typing import Dict, Union
@@ -88,6 +89,12 @@ if __name__ == "__main__":
     p_q1.add_argument("--root", required=True)
     p_q1.add_argument("--index", required=True)
     p_q1.add_argument("--cid", type=int, required=True)
+    
+    p_q1b = sub.add_parser("batch-get-compound", help="Batch get compound records by CIDs.")
+    p_q1b.add_argument("--root", required=True)
+    p_q1b.add_argument("--index", required=True)
+    p_q1b.add_argument("--cid_start", type=int, required=True)
+    p_q1b.add_argument("--cid_end", type=int, required=True)
 
     p_q2 = sub.add_parser("get-conformer", help="Get conformer record by conformer_id.")
     p_q2.add_argument("--root", required=True)
@@ -102,48 +109,66 @@ if __name__ == "__main__":
     p_q3.add_argument("--cid", type=int, required=True)
     p_q3.add_argument("--limit", type=int, default=10)
 
-    args = parser.parse_args()
+    args: Namespace = parser.parse_args()
 
-    if args.cmd == "build":
-        meta = build_index(
-            args.root, args.index, map_size=args.map_size, verbose=not args.quiet
-        )
-        print(json.dumps(meta, ensure_ascii=False, indent=2))
-
-    elif args.cmd == "get-compound":
-        idx = SDFIndex(args.index, readonly=True)
-        hit = idx.get_compound_by_cid(args.cid)
-        if not hit:
-            print("NOT FOUND")
-        else:
-            seg = idx.read_segment(args.root, hit.locator)
-            print(f"ALID={hit.alid}")
-            print(
-                f"file_id={hit.locator.file_id} start={hit.locator.start} end={hit.locator.end} cid={hit.locator.cid}"
+    match args.cmd:
+        case "build":                
+            meta = build_index(
+                args.root, args.index, map_size=args.map_size, verbose=not args.quiet
             )
-            print(seg[:4000].decode("utf-8", errors="replace"))
+            print(json.dumps(meta, ensure_ascii=False, indent=2))
 
-    elif args.cmd == "get-conformer":
-        idx = SDFIndex(args.index, readonly=True)
-        hit = idx.get_conformer_by_conformer_id(args.confid)
-        if not hit:
-            print("NOT FOUND")
-        else:
-            seg = idx.read_segment(args.root, hit.locator)
-            print(f"ALID={hit.alid}")
-            print(
-                f"file_id={hit.locator.file_id} start={hit.locator.start} end={hit.locator.end} cid={hit.locator.cid}"
-            )
-            print(seg[:4000].decode("utf-8", errors="replace"))
+        case "get-compound":
+            idx = SDFIndex(args.index, readonly=True)
+            hit = idx.get_compound_by_cid(args.cid)
+            if not hit:
+                print("NOT FOUND")
+            else:
+                seg = idx.read_segment(args.root, hit.locator)
+                print(f"ALID={hit.alid}")
+                print(
+                    f"file_id={hit.locator.file_id} start={hit.locator.start} end={hit.locator.end} cid={hit.locator.cid}"
+                )
+                print(seg.decode("utf-8", errors="replace"))
 
-    elif args.cmd == "list-conformers":
-        idx = SDFIndex(args.index, readonly=True)
-        count = 0
-        for hit in idx.iter_conformers_by_cid(args.cid):
-            print(
-                f"[{count}] ALID={hit.alid} file_id={hit.locator.file_id} start={hit.locator.start} end={hit.locator.end} cid={hit.locator.cid}"
-            )
-            count += 1
-            if count >= args.limit:
-                break
-        print(f"shown {count}")
+        case "batch-get-compound":
+            idx = SDFIndex(args.index, readonly=True)
+            cids=list(range(args.cid_start, args.cid_end+1))
+            hit = idx.batch_get_compounds_by_cid(cids)
+            if not hit:
+                print("NOT FOUND")
+            else:
+                seg = idx.read_segment(args.root, hit.locator)
+                print(f"ALID={hit.alid}")
+                print(
+                    f"file_id={hit.locator.file_id} start={hit.locator.start} end={hit.locator.end} cid={hit.locator.cid}"
+                )
+                print(seg.decode("utf-8", errors="replace"))
+
+        case "get-conformer":
+            idx = SDFIndex(args.index, readonly=True)
+            hit = idx.get_conformer_by_conformer_id(args.confid)
+            if not hit:
+                print("NOT FOUND")
+            else:
+                seg = idx.read_segment(args.root, hit.locator)
+                print(f"ALID={hit.alid}")
+                print(
+                    f"file_id={hit.locator.file_id} start={hit.locator.start} end={hit.locator.end} cid={hit.locator.cid}"
+                )
+                print(seg.decode("utf-8", errors="replace"))
+
+        case "list-conformers":
+            idx = SDFIndex(args.index, readonly=True)
+            count = 0
+            for hit in idx.iter_conformers_by_cid(args.cid):
+                print(
+                    f"[{count}] ALID={hit.alid} file_id={hit.locator.file_id} start={hit.locator.start} end={hit.locator.end} cid={hit.locator.cid}"
+                )
+                count += 1
+                if count >= args.limit:
+                    break
+            print(f"shown {count}")
+
+        case _:
+            print(f"Unknown command: {args.cmd}")
