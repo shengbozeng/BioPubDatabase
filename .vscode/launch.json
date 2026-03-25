@@ -28,9 +28,9 @@
             "args": [
                 "build",
                 "--root",
-                "/ai/data/pubchem_unzipped_data/conformer",
+                "Z:\\pubchem_unzipped_data\\conformer",
                 "--index",
-                "/ai/data/pubchem_unzipped_data/conformer",
+                "Z:\\pubchem_unzipped_dataconformer",
                 "--map-size",
                 "1099511627776",
             ]
@@ -48,9 +48,9 @@
             "args": [
                 "get-compound",
                 "--root",
-                "/ai/data/pubchem_unzipped_data/compound",
+                "Z:\\pubchem_unzipped_data\\compound",
                 "--index",
-                "/ai/data/pubchem_unzipped_data/compound",
+                "Z:\\pubchem_unzipped_data\\compound",
                 "--cid",
                 "361276"
             ]
@@ -68,9 +68,9 @@
             "args": [
                 "batch-get-compound",
                 "--root",
-                "/ai/data/pubchem_unzipped_data/compound",
+                "Z:\\pubchem_unzipped_data\\compound",
                 "--index",
-                "/ai/data/pubchem_unzipped_data/compound",
+                "Z:\\pubchem_unzipped_data\\compound",
                 "--cid_start",
                 "1",
                 "--cid_end",
@@ -81,7 +81,7 @@
             "name": "SDFIndex: get conformer (main.py + args)",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/nih/pubchem/index/main.py",
+            "program": "${workspaceFolder}/test/nih/pubchem/data/main.py",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
             "env": {
@@ -90,9 +90,9 @@
             "args": [
                 "get-conformer",
                 "--root",
-                "/ai/data/pubchem_unzipped_data/compound",
+                "Z:\\pubchem_unzipped_data\\conformer",
                 "--index",
-                "/ai/data/pubchem_unzipped_data/compound",
+                "Z:\\pubchem_unzipped_data\\conformer",
                 "--confid",
                 "361276"
             ]
@@ -101,7 +101,7 @@
             "name": "SDFIndex: list conformers (main.py + args)",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/nih/pubchem/index/main.py",
+            "program": "${workspaceFolder}/test/nih/pubchem/data/main.py",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
             "env": {
@@ -110,12 +110,42 @@
             "args": [
                 "list-conformers",
                 "--root",
-                "/ai/data/pubchem_unzipped_data/compound",
+                "Z:\\pubchem_unzipped_data\\conformer",
                 "--index",
-                "/ai/data/pubchem_unzipped_data/compound",
-                "--cid",
-                "2750298"
+                "Z:\\pubchem_unzipped_data\\conformer",
+                "--cid_start",
+                "1",
+                "--cid_end",
+                "9999999"
             ]
-        }
+        },
+        {
+            "name": "SDFIndex: batch query data (main.py + args)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/test/nih/pubchem/data/main.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            },
+            "args": [
+                "batch-query-data",
+                "--compound_root",
+                "Z:\\pubchem_unzipped_data\\compound",
+                "--compound_index",
+                "Z:\\pubchem_unzipped_data\\compound",
+                "--cid_start",
+                "1",
+                "--cid_end",
+                "9999999",
+                "--conformer_root",
+                "Z:\\pubchem_unzipped_data\\conformer",
+                "--conformer_index",
+                "Z:\\pubchem_unzipped_data\\conformer",
+                "--conformer_limit",
+                "1"
+            ]
+        },
     ]
 }
