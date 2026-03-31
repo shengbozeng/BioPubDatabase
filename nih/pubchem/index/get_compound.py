@@ -25,10 +25,10 @@ def get_compound(
 
 
 
-def get_conformer(index_path: str, root_path: str, confid_list: List[str]) -> None | str:
+def get_conformer(index_path: str, root_path: str, confid_list: List[str]) -> None | dict[str, str | None]:
 
     idx = SDFIndex(index_path, readonly=True)
-    conformer_dict={}
+    conformer_dict: dict[str, str | None] = {}
     for confid in confid_list:
         hit = idx.get_conformer_by_conformer_id(confid)
         if not hit:

@@ -28,9 +28,9 @@
             "args": [
                 "build",
                 "--root",
-                "Z:\\pubchem_unzipped_data\\conformer",
+                "/ai/data/pubchem_unzipped_data/conformer",
                 "--index",
-                "Z:\\pubchem_unzipped_dataconformer",
+                "/ai/data/pubchem_unzipped_data/conformer",
                 "--map-size",
                 "1099511627776",
             ]
@@ -48,9 +48,9 @@
             "args": [
                 "get-compound",
                 "--root",
-                "Z:\\pubchem_unzipped_data\\compound",
+                "/ai/data/pubchem_unzipped_data/compound",
                 "--index",
-                "Z:\\pubchem_unzipped_data\\compound",
+                "/ai/data/pubchem_unzipped_data/compound",
                 "--cid",
                 "361276"
             ]
@@ -68,9 +68,9 @@
             "args": [
                 "batch-get-compound",
                 "--root",
-                "Z:\\pubchem_unzipped_data\\compound",
+                "/ai/data/pubchem_unzipped_data/compound",
                 "--index",
-                "Z:\\pubchem_unzipped_data\\compound",
+                "/ai/data/pubchem_unzipped_data/compound",
                 "--cid_start",
                 "1",
                 "--cid_end",
@@ -81,7 +81,7 @@
             "name": "SDFIndex: get conformer (main.py + args)",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/test/nih/pubchem/data/main.py",
+            "program": "${workspaceFolder}/testcase/nih/pubchem/data/main.py",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
             "env": {
@@ -90,9 +90,9 @@
             "args": [
                 "get-conformer",
                 "--root",
-                "Z:\\pubchem_unzipped_data\\conformer",
+                "/ai/data/pubchem_unzipped_data/conformer",
                 "--index",
-                "Z:\\pubchem_unzipped_data\\conformer",
+                "/ai/data/pubchem_unzipped_data/conformer",
                 "--confid",
                 "361276"
             ]
@@ -101,7 +101,7 @@
             "name": "SDFIndex: list conformers (main.py + args)",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/test/nih/pubchem/data/main.py",
+            "program": "${workspaceFolder}/testcase/nih/pubchem/data/main.py",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
             "env": {
@@ -110,9 +110,9 @@
             "args": [
                 "list-conformers",
                 "--root",
-                "Z:\\pubchem_unzipped_data\\conformer",
+                "/ai/data/pubchem_unzipped_data/conformer",
                 "--index",
-                "Z:\\pubchem_unzipped_data\\conformer",
+                "/ai/data/pubchem_unzipped_data/conformer",
                 "--cid_start",
                 "1",
                 "--cid_end",
@@ -123,7 +123,7 @@
             "name": "SDFIndex: batch query data (main.py + args)",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/test/nih/pubchem/data/main.py",
+            "program": "${workspaceFolder}/testcase/nih/pubchem/data/main.py",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
             "env": {
@@ -132,17 +132,17 @@
             "args": [
                 "batch-query-data",
                 "--compound_root",
-                "Z:\\pubchem_unzipped_data\\compound",
+                "/ai/data/pubchem_unzipped_data/compound",
                 "--compound_index",
-                "Z:\\pubchem_unzipped_data\\compound",
+                "/ai/data/pubchem_unzipped_data/compound",
                 "--cid_start",
-                "1",
+                "50000000",
                 "--cid_end",
-                "9999999",
+                "54999999",
                 "--conformer_root",
-                "Z:\\pubchem_unzipped_data\\conformer",
+                "/ai/data/pubchem_unzipped_data/conformer",
                 "--conformer_index",
-                "Z:\\pubchem_unzipped_data\\conformer",
+                "/ai/data/pubchem_unzipped_data/conformer",
                 "--conformer_limit",
                 "1"
             ]

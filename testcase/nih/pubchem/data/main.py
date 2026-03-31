@@ -26,25 +26,19 @@
 # Install:
 #   pip install lmdb
 # Optional:
-#   pip install tqdm
+#   pip install rich
 
 from __future__ import annotations
 
 from argparse import Namespace
 import json
-import os
-from os import write
 from pathlib import Path
-from queue import Queue
-import threading
 from typing import Dict, List, Union
-from typing_extensions import Writer
-
-from rdkit import Chem
 from rich.progress import (
     BarColumn,
     MofNCompleteColumn,
     Progress,
+    TaskID,
     TextColumn,
     TimeElapsedColumn,
     TimeRemainingColumn,
@@ -53,14 +47,15 @@ from nih.pubchem.index.sdf_index import SDFIndex
 from nih.pubchem.index.sdf_index_builder import SDFIndexBuilder
 from pybiotech.loaders.sdf_loader import SDFLoader
 from rdkit.Chem import SDWriter, Mol
+from  testcase.nih.pubchem.data.conformer import batch_get_conformers, get_conformer, list_conformers
 
+from testcase.nih.pubchem.data.compound import batch_get_compounds, get_compound
 from utils.compound_conf_merge import merge_compound_to_conformer
 
 # -----------------------------
 # CLI helpers (optional)
 # -----------------------------
 
-DEFAULT_IO_WORKERS = min(32, max(4, (os.cpu_count() or 1) * 2))
 
 
 def _fetch_single_compound(
@@ -76,32 +71,6 @@ def _fetch_single_compound(
     finally:
         local_idx.env.close()
 
-
-def _compound_worker(
-    index_dir: Union[str, Path],
-    root_dir: str,
-    cid_queue: Queue,
-    result_queue: Queue,
-) -> None:
-    local_idx = SDFIndex(index_dir, readonly=True)
-    try:
-        while True:
-            cid = cid_queue.get()
-            if cid is None:
-                cid_queue.task_done()
-                break
-
-            try:
-                hit = local_idx.get_compound_by_cid(cid)
-                if not hit:
-                    result_queue.put((cid, None))
-                else:
-                    seg = local_idx.read_segment(root_dir, hit.locator)
-                    result_queue.put((cid, seg.decode("utf-8", errors="replace")))
-            finally:
-                cid_queue.task_done()
-    finally:
-        local_idx.env.close()
 
 
 def _list_single_conformer(
@@ -122,37 +91,6 @@ def _list_single_conformer(
         local_idx.env.close()
 
 
-def _conformer_worker(
-    index_dir: Union[str, Path],
-    root_dir: str,
-    limit: int,
-    cid_queue: Queue,
-    result_queue: Queue,
-) -> None:
-    local_idx = SDFIndex(index_dir, readonly=True)
-    try:
-        while True:
-            cid = cid_queue.get()
-            if cid is None:
-                cid_queue.task_done()
-                break
-
-            try:
-                conformer_data: str | None = None
-                count = 0
-                for hit in local_idx.iter_conformers_by_cid(cid):
-                    seg = local_idx.read_segment(root_dir, hit.locator)
-                    conformer_data = seg.decode("utf-8", errors="replace")
-                    count += 1
-                    if count >= limit:
-                        break
-                result_queue.put((cid, conformer_data, count))
-            finally:
-                cid_queue.task_done()
-    finally:
-        local_idx.env.close()
-
-
 def build_index(
     root_dir: Union[str, Path],
     index_dir: Union[str, Path],
@@ -168,163 +106,6 @@ def build_index(
     return builder.build()
 
 
-def get_compound(idx: SDFIndex, cid: int, root_dir: str):
-    hit = idx.get_compound_by_cid(cid=cid)
-    if not hit:
-        print("NOT FOUND")
-    else:
-        seg = idx.read_segment(root_dir, hit.locator)
-        print(f"ALID={hit.alid}")
-        print(
-            f"file_id={hit.locator.file_id} start={hit.locator.start} end={hit.locator.end} cid={hit.locator.cid}"
-        )
-        print(seg.decode("utf-8", errors="replace"))
-
-
-def batch_get_compounds(
-    idx: SDFIndex,
-    cids: list[int],
-    root_dir: str,
-    max_workers: int = DEFAULT_IO_WORKERS,
-) -> Dict[int, str] | None:
-    if not cids:
-        return None
-
-    found = 0
-    compounds_data: Dict[int, str] = {}
-    worker_count = min(max_workers, len(cids))
-    cid_queue: Queue = Queue()
-    result_queue: Queue = Queue()
-    workers: list[threading.Thread] = []
-
-    for cid in cids:
-        cid_queue.put(cid)
-    for _ in range(worker_count):
-        cid_queue.put(None)
-
-    with Progress(
-        TextColumn("[bold blue]{task.description}"),
-        BarColumn(),
-        MofNCompleteColumn(),
-        TimeElapsedColumn(),
-        TimeRemainingColumn(),
-    ) as progress:
-        task_id = progress.add_task("Fetching compounds", total=len(cids))
-        for _ in range(worker_count):
-            worker = threading.Thread(
-                target=_compound_worker,
-                args=(idx.index_dir, root_dir, cid_queue, result_queue),
-                daemon=True,
-            )
-            worker.start()
-            workers.append(worker)
-
-        processed = 0
-        while processed < len(cids):
-            cid, compound_raw = result_queue.get()
-            if compound_raw is not None:
-                compounds_data[cid] = compound_raw
-                found += 1
-            processed += 1
-            progress.advance(task_id)
-
-    cid_queue.join()
-    for worker in workers:
-        worker.join()
-
-    if found == 0:
-        print("NOT FOUND")
-    return compounds_data
-
-
-def get_conformer(idx: SDFIndex, conformer_id: str, root_dir: str):
-    hit = idx.get_conformer_by_conformer_id(conformer_id)
-    if not hit:
-        print("NOT FOUND")
-    else:
-        seg = idx.read_segment(root_dir, hit.locator)
-        print(f"ALID={hit.alid}")
-        print(
-            f"file_id={hit.locator.file_id} start={hit.locator.start} end={hit.locator.end} cid={hit.locator.cid}"
-        )
-        print(seg.decode("utf-8", errors="replace"))
-
-
-def batch_get_conformers(idx: SDFIndex, confids: list[str], root_dir: str):
-    found = 0
-    for confid, hit in idx.batch_get_conformers_by_conformer_id(confids):
-        if not hit:
-            print(f"Conformer ID={confid} NOT FOUND")
-            continue
-
-        seg = idx.read_segment(root_dir, hit.locator)
-        print(f"Conformer ID={confid} ALID={hit.alid}")
-        print(
-            f"file_id={hit.locator.file_id} start={hit.locator.start} end={hit.locator.end} cid={hit.locator.cid}"
-        )
-        print(seg.decode("utf-8", errors="replace"))
-        found += 1
-
-    if found == 0:
-        print("NOT FOUND")
-
-
-def list_conformers(
-    idx: SDFIndex,
-    cids: list[int],
-    root_dir: str,
-    limit: int = 10,
-    max_workers: int = DEFAULT_IO_WORKERS,
-) -> Dict[int, str] | None:
-    if not cids:
-        return None
-
-    conformers_data: Dict[int, str] = {}
-    counts_by_cid: Dict[int, int] = {}
-    worker_count = min(max_workers, len(cids))
-    cid_queue: Queue = Queue()
-    result_queue: Queue = Queue()
-    workers: list[threading.Thread] = []
-
-    for cid in cids:
-        cid_queue.put(cid)
-    for _ in range(worker_count):
-        cid_queue.put(None)
-
-    with Progress(
-        TextColumn("[bold green]{task.description}"),
-        BarColumn(),
-        MofNCompleteColumn(),
-        TimeElapsedColumn(),
-        TimeRemainingColumn(),
-    ) as progress:
-        task_id = progress.add_task("Listing conformers", total=len(cids))
-        for _ in range(worker_count):
-            worker = threading.Thread(
-                target=_conformer_worker,
-                args=(idx.index_dir, root_dir, limit, cid_queue, result_queue),
-                daemon=True,
-            )
-            worker.start()
-            workers.append(worker)
-
-        processed = 0
-        while processed < len(cids):
-            cid, conformer_raw, count = result_queue.get()
-            counts_by_cid[cid] = count
-            if conformer_raw is not None:
-                conformers_data[cid] = conformer_raw
-            processed += 1
-            progress.advance(task_id)
-
-    cid_queue.join()
-    for worker in workers:
-        worker.join()
-
-    for cid in cids:
-        print(f"cid:\t{cid} shown {counts_by_cid.get(cid, 0)}")
-    return conformers_data if conformers_data else None
-
 
 def batch_query_data(
     comcound_idx: SDFIndex,
@@ -333,7 +114,7 @@ def batch_query_data(
     compound_root_dir: str,
     conformer_root_dir: str,
     conformer_limit: int = 10,
-):
+) -> None | List[Mol]:
     # Example: batch query compounds and conformers for CID range
     compounds_data: Dict[int, str] | None = batch_get_compounds(
         comcound_idx, cids, compound_root_dir
@@ -354,7 +135,7 @@ def batch_query_data(
         TimeElapsedColumn(),
         TimeRemainingColumn(),
     ) as progress:
-        task_id = progress.add_task(
+        task_id: TaskID = progress.add_task(
             "Merging compound/conformer data", total=len(compounds_data)
         )
         for key, compound_raw in compounds_data.items():
@@ -362,7 +143,7 @@ def batch_query_data(
                 progress.advance(task_id)
                 continue
 
-            print(f"Compound CID={key} \n")
+            # print(f"Compound CID={key} \n")
             compound_mols, _, _ = SDFLoader.readDataFromText(compound_raw)
             compound_mol = compound_mols[0] if compound_mols else None
             if not compound_mol:
@@ -508,9 +289,9 @@ if __name__ == "__main__":
 
             if mols:
                 sdf_output_doc = Path(
-                    f"{args.cid_start}_{args.cid_end}_merged_mols.sdf"
+                    f"0{args.cid_start}_0{args.cid_end}_merged_mols.sdf"
                 )
-                writer = Chem.SDWriter(str(sdf_output_doc))
+                writer = SDWriter(str(sdf_output_doc))
                 for mol in mols:
                     writer.write(mol=mol)
                 writer.flush()
