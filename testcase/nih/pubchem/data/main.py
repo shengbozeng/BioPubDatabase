@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """************************************************************
-### Author: Zeng Shengbo shengbo.zeng@ailingues.com
+### Author: Zeng Shengbo shengbo.zeng@accelbio.ai
 ### Date: 12/27/2025 20:40:59
-### LastEditors: Zeng Shengbo shengbo.zeng@ailingues.com
+### LastEditors: Zeng Shengbo shengbo.zeng@accelbio.ai
 ### LastEditTime: 12/27/2025 21:04:06
 ### FilePath: //pubchem//nih//pubchem//index//main.py
 ### Description:
 ###
-### Copyright (c) 2025 by AI Lingues, All Rights Reserved.
+### Copyright (c) 2025 by AccelBio.AI, All Rights Reserved.
 **********************************************************"""
 # sdf_index.py
 # Production-ready SDF offset index for huge files (GB-scale) with LMDB.

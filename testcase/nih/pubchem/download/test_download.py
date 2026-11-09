@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 ''' ************************************************************ 
-### Author: Zeng Shengbo shengbo.zeng@ailingues.com
+### Author: Zeng Shengbo shengbo.zeng@accelbio.ai
 ### Date: 12/27/2025 16:06:59
-### LastEditors: Zeng Shengbo shengbo.zeng@ailingues.com
+### LastEditors: Zeng Shengbo shengbo.zeng@accelbio.ai
 ### LastEditTime: 12/27/2025 19:31:26
 ### FilePath: //pubchem//nih//pubchem//download//main.py
 ### Description: 
 ### 
-### Copyright (c) 2025 by AI Lingues, All Rights Reserved. 
+### Copyright (c) 2025 by AccelBio.AI, All Rights Reserved. 
 ********************************************************** '''
 import enum
 import os
